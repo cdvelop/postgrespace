@@ -11,7 +11,9 @@ Este laboratorio permite trabajar con PostgreSQL y pgAdmin directamente desde el
 
 ## 1. Crear una copia del repositorio
 
-Haz clic en **Fork** para crear una copia del repositorio en tu cuenta de GitHub.
+Haz clic en **Fork** para crear una copia de este repositorio en tu cuenta de GitHub.
+
+>![fork](docs/images/fork.png)
 
 ---
 
@@ -22,6 +24,8 @@ Haz clic en **Fork** para crear una copia del repositorio en tu cuenta de GitHub
 3. Selecciona la pestaña **Codespaces**.
 4. Haz clic en **Create codespace on main**.
 
+>![codespaces](docs/images/codespaces.png)
+
 La primera creación puede tardar algunos minutos mientras GitHub prepara el entorno.
 
 ---
@@ -31,6 +35,10 @@ La primera creación puede tardar algunos minutos mientras GitHub prepara el ent
 Cuando el entorno termine de iniciar, se recomienda seleccionar:
 
 **Open in Visual Studio Code**
+- ![open-vscode](docs/images/open_vsc.png)
+- ![open-vscode](docs/images/open_vsc1.png)
+- ![open-vscode](docs/images/open_vsc2.png)
+
 
 Esta opción suele ser más estable que la versión web cuando la carga inicial del navegador presenta problemas.
 
@@ -41,11 +49,13 @@ También puedes utilizar la versión web si prefieres trabajar completamente des
 ## 4. Abrir pgAdmin
 
 1. En Visual Studio Code abre la pestaña **Ports**.
+> ![open-browser](docs/images/vsc_port.png)
 2. Busca el puerto etiquetado como **pgAdmin**.
 3. Haz clic en **Open in Browser**.
 
 No es necesario cambiar la visibilidad de los puertos a Público.
 
+> ![open-browser](docs/images/open_browser.png)
 ---
 
 ## 5. Iniciar sesión en pgAdmin
@@ -64,19 +74,25 @@ alumno@postgres.com
 1234
 ```
 
+> ![port-vscode](docs/images/pg_login.png)
 ---
 
 ## 6. Registrar el servidor PostgreSQL
 
 La primera vez que ingreses a pgAdmin deberás registrar el servidor.
 
+> ![port-vscode](docs/images/pg_servers.png)
+
 ### Pestaña General
 
 **Name**
 
 ```text
-PostgreSQL Local
+PostgreSQL Local, MY_SERVIDOR, etc.
 ```
+> ![port-vscode](docs/images/pg_name.png)
+
+
 
 ### Pestaña Connection
 
@@ -118,6 +134,7 @@ Save Password
 
 y presiona **Save**.
 
+> ![pg-connection](docs/images/pg_connection.png)
 ---
 
 ## 7. Verificar la conexión
@@ -130,6 +147,7 @@ Si la configuración es correcta, aparecerá el servidor en el panel izquierdo d
 * Administrar usuarios.
 * Exportar e importar datos.
 
+> ![port-vscode](docs/images/pgadmin.png)
 ---
 
 ## Solución de problemas
@@ -181,5 +199,3 @@ Usuario: postgres
 Contraseña: 1234
 Base de datos: postgres
 ```
-
-![pgAdmin](docs/images/pgadmin.png)
