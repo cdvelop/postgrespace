@@ -19,6 +19,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: unless-stopped
+    user: root
     environment:
       PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
       PGADMIN_DEFAULT_PASSWORD: 1234
