@@ -56,8 +56,12 @@ CREATE TABLE consultas_veterinarias (
 );
 ```
 
-> 💡 `DECIMAL(6,2)` es el tipo ideal para dinero: hasta 6 dígitos en total y 2 decimales
-> (por ejemplo `9999.99`).
+> 💡 **`DECIMAL(6,2)` se lee `DECIMAL(precisión, escala)`:** el **primer** número es la cantidad
+> **total** de dígitos y el **segundo** es cuántos van **después** del punto decimal. Así
+> `DECIMAL(6,2)` admite hasta 6 dígitos con 2 decimales → como máximo `9999.99` (4 enteros + 2
+> decimales). Por eso es ideal para dinero: la cantidad de decimales es **fija y exacta** (a
+> diferencia de los tipos con coma flotante, que redondean). Usa una escala mayor para más
+> precisión, p. ej. `DECIMAL(10,4)`.
 
 </details>
 

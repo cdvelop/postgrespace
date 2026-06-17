@@ -11,6 +11,8 @@ simple a lo más completo, sobre un caso práctico. Hazlos en orden.
 | # | Set | De qué trata | Aprendes |
 |---|---|---|---|
 | 01 | **[Veterinaria](01-veterinaria/README.md)** | Tutores, mascotas y consultas | CRUD básico, CREATE TABLE, claves foráneas y JOIN |
+| 02 | **[Consultas y análisis](02-consultas-analisis/README.md)** | Le haces preguntas a la base de la veterinaria | `WHERE` avanzado, `ORDER BY`, agregaciones, `GROUP BY`/`HAVING`, `LEFT JOIN` y subconsultas |
+| 03 | **[Haciendo crecer el modelo](03-modelo-crece/README.md)** | Amplías la veterinaria con veterinarios y servicios | `ALTER TABLE`, `CHECK`/`DEFAULT`/`UNIQUE`, relación muchos-a-muchos con tabla puente y JOIN de varias tablas |
 
 > 🚧 Se irán agregando más sets. Cada uno vive en su propia carpeta (`02-…`, `03-…`) para que
 > no se mezclen entre sí.
