@@ -14,6 +14,24 @@ No necesitas instalar PostgreSQL ni pgAdmin: todo corre en la nube.
 
 ---
 
+## ⚠️ Antes de empezar: aumenta el tiempo de inactividad
+
+Configura el **Default idle timeout** de Codespaces a **90 minutos** para evitar que la
+máquina se apague mientras trabajas.
+
+> **¿Por qué?** Por un bug de este sistema al usar contenedores, GitHub no detecta la
+> actividad dentro de VS Code y apaga el Codespace por inactividad, aunque estés trabajando.
+
+Solo se configura una vez en tu cuenta:
+
+1. Entra en **Settings** de tu cuenta de GitHub.
+2. Ve a la sección **Codespaces**.
+3. En **Default idle timeout**, escribe **90** minutos y guarda.
+
+> ![timeout-codespace](images/timeout_codespace_config.png)
+
+---
+
 ## 1. Crear una copia del repositorio
 
 Haz clic en **Fork** para crear una copia de este repositorio en tu cuenta de GitHub.
