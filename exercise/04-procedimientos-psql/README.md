@@ -18,7 +18,7 @@ que operan y la terminal `psql` para controlarlo todo sin interfaz gráfica.
 
 | # | Ejercicio | Aprendes | Tú haces |
 |---|---|---|---|
-| 1 | **[Backup y restauración con la terminal](paso1.md)** | `pg_dump`, `psql < archivo`, `psql -c` | Hacer backup de la veterinaria y restaurarla en una base nueva |
+| 1 | **[psql, backup y usuarios](paso1.md)** | `psql`, `pg_dump`, `psql < archivo`, `CREATE USER`, `GRANT` | Primer contacto con psql, backup en pgAdmin y terminal, restauración y usuario con permisos limitados |
 | 2 | **[Tu primera función almacenada](paso2.md)** | `CREATE FUNCTION`, `RETURNS TABLE`, `\df` | Función de costo total por tutor y función de resumen de historial |
 | 3 | **[Procedimiento y psql en práctica](paso3.md)** | `CREATE PROCEDURE`, `LANGUAGE plpgsql`, `CALL`, `RETURNING INTO` | Procedimiento que registra una consulta en dos tablas de una vez |
 
