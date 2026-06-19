@@ -35,6 +35,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
       PGADMIN_DEFAULT_PASSWORD: 1234
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
     ports:
       - "5050:80"
     volumes:
