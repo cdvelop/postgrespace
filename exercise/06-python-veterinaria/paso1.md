@@ -17,7 +17,7 @@ Python ya está incluido — no necesitas instalar nada. Verifica en el terminal
 python3 --version
 ```
 
-Verás algo como `Python 3.11.x`. ✅
+Verás algo como `Python 3.12.x` (o cualquier `3.x`). ✅
 
 ### Si usas instalación local en Windows
 
