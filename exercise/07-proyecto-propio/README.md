@@ -1,6 +1,6 @@
-# Set 05 — Proyecto propio 🎓
+# Set 07 — Proyecto propio 🎓
 
-Has completado los Sets 01 al 04: CRUD, JOINs, análisis, modelos N:M, funciones,
+Has completado los Sets 01 al 06: CRUD, JOINs, análisis, modelos N:M, funciones,
 procedimientos y backup. Este set es la **demostración de que lo dominas**: diseñas y
 construyes una base de datos de un dominio que tú eliges, desde cero.
 
@@ -9,7 +9,7 @@ construyes una base de datos de un dominio que tú eliges, desde cero.
 > procedimiento o función. El resultado debe funcionar de forma autónoma al arrancar el
 > Dev Container.
 
-> **Requisito:** haber completado los Sets 01 al 04.
+> **Requisito:** haber completado los Sets 01 al 06.
 
 ---
 
@@ -72,7 +72,7 @@ CREATE FUNCTION ...  -- o CREATE PROCEDURE
 ```
 entregas/
 └── apellido_nombre/
-    └── 05-proyecto-propio/
+    └── 07-proyecto-propio/
         ├── README.md         ← descripción del proyecto (ver abajo)
         ├── initdb.sql        ← copia de tu script (el mismo que va en .devcontainer/initdb/)
         └── consultas.sql     ← tus 3+ consultas de análisis
@@ -82,7 +82,7 @@ entregas/
 
 ## El README.md de tu proyecto
 
-Dentro de `entregas/apellido_nombre/05-proyecto-propio/` incluye un `README.md` con:
+Dentro de `entregas/apellido_nombre/07-proyecto-propio/` incluye un `README.md` con:
 
 1. **Nombre del proyecto** y dominio elegido
 2. **Descripción de las tablas**: qué representa cada una
@@ -129,7 +129,7 @@ Si algo falla durante el Rebuild, revisa los logs del contenedor para identifica
 - [ ] La base de datos tiene mínimo 5 tablas
 - [ ] Hay al menos 1 relación N:M con tabla puente
 - [ ] Hay datos de prueba en todas las tablas
-- [ ] `entregas/apellido_nombre/05-proyecto-propio/README.md` está completo
-- [ ] `entregas/apellido_nombre/05-proyecto-propio/initdb.sql` es una copia del script
-- [ ] `entregas/apellido_nombre/05-proyecto-propio/consultas.sql` tiene 3+ consultas
+- [ ] `entregas/apellido_nombre/07-proyecto-propio/README.md` está completo
+- [ ] `entregas/apellido_nombre/07-proyecto-propio/initdb.sql` es una copia del script
+- [ ] `entregas/apellido_nombre/07-proyecto-propio/consultas.sql` tiene 3+ consultas
 - [ ] Todo está en tu fork con un **Pull Request** al repositorio del curso
