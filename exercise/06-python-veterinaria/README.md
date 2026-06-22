@@ -17,7 +17,7 @@ hacer operaciones de base de datos desde código.
 |---|---|---|---|
 | 1 | **[Conexión y primera consulta](paso1.md)** | `psycopg2`, variables de entorno, `cursor.execute()` | Conectarte a la veterinaria y listar mascotas |
 | 2 | **[Consultas con parámetros](paso2.md)** | Parámetros seguros (`%s`), `fetchone()`, `fetchall()` | Buscar mascotas por especie y obtener el historial de un tutor |
-| 3 | **[CRUD completo](paso3.md)** | `INSERT`, `UPDATE`, `DELETE` desde Python, `commit()` | Registrar una mascota nueva, actualizar datos y eliminarla |
+| 3 | **[CRUD y transacciones](paso3.md)** | `INSERT`, `UPDATE`, `DELETE`, `commit()`/`rollback()`, transacción atómica | CRUD de una mascota y registrar consulta + servicio como una sola transacción "todo o nada" |
 
 ---
 

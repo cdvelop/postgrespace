@@ -1,7 +1,8 @@
-# Ejercicio 3 — CRUD completo desde Python
+# Ejercicio 3 — CRUD y transacciones desde Python
 
 > 🎯 **Qué vas a aprender:** a insertar, actualizar y eliminar datos desde Python
-> usando `commit()` para confirmar los cambios en la base de datos.
+> usando `commit()`, y a agrupar varias operaciones en una sola **transacción**
+> ("todo o nada") con `rollback()` cuando algo falla.
 
 ---
 
@@ -39,10 +40,10 @@ cursor = conn.cursor()
 
 # INSERT con parámetros y RETURNING para obtener el id generado
 cursor.execute("""
-    INSERT INTO mascotas (nombre, especie, raza, fecha_nacimiento, tutor_id)
-    VALUES (%s, %s, %s, %s, %s)
+    INSERT INTO mascotas (nombre, especie, edad_meses, tutor_id)
+    VALUES (%s, %s, %s, %s)
     RETURNING id_mascota;
-""", ("Thor", "Perro", "Golden Retriever", "2022-03-15", 2))
+""", ("Thor", "Perro", 6, 2))
 
 id_nuevo = cursor.fetchone()[0]
 conn.commit()
@@ -60,10 +61,10 @@ print(f"Mascota registrada con id: {id_nuevo}")
 Agrega esto al script (antes del `close()`):
 
 ```python
-# Actualiza la raza de la mascota recién creada
+# Actualiza la edad de la mascota recién creada
 cursor.execute("""
-    UPDATE mascotas SET raza = %s WHERE id_mascota = %s;
-""", ("Labrador Retriever", id_nuevo))
+    UPDATE mascotas SET edad_meses = %s WHERE id_mascota = %s;
+""", (8, id_nuevo))
 
 filas_afectadas = cursor.rowcount
 conn.commit()
@@ -82,7 +83,7 @@ Antes de borrar, verifica que los cambios están en la base:
 
 ```python
 cursor.execute("""
-    SELECT id_mascota, nombre, especie, raza FROM mascotas WHERE id_mascota = %s;
+    SELECT id_mascota, nombre, especie, edad_meses FROM mascotas WHERE id_mascota = %s;
 """, (id_nuevo,))
 
 mascota = cursor.fetchone()
@@ -121,61 +122,111 @@ Resultado esperado:
 Mascota registrada con id: 9
 Actualización: 1 fila(s) modificada(s)
 
-Verificación: (9, 'Thor', 'Perro', 'Labrador Retriever')
+Verificación: (9, 'Thor', 'Perro', 8)
 Mascota id 9 eliminada
 Filas con ese id después del DELETE: 0
 ```
 
 ---
 
-## Paso 3.5 — Manejo de errores con rollback
+## Paso 3.5 — Transacciones: dos operaciones, todo o nada
 
-En producción siempre proteges las operaciones con `try/except`:
+Hasta aquí cada `commit()` confirmó **una sola** operación. Pero en la vida real muchas
+operaciones van **juntas o no van**. Registrar una consulta es el caso típico:
+
+1. Insertar la consulta en `consultas_veterinarias`.
+2. Registrar el servicio aplicado en `consulta_servicios` (la tabla puente del Set 03).
+
+Una consulta guardada **sin** su servicio —o al revés— deja la base inconsistente.
+Las dos inserciones deben formar **una sola transacción**: si la segunda falla,
+la primera tampoco debe quedar.
+
+### Versión correcta: un solo commit para las dos
 
 ```python
 try:
+    # Operación 1: la consulta. RETURNING nos da el id para la operación 2.
     cursor.execute("""
-        INSERT INTO mascotas (nombre, especie, tutor_id)
-        VALUES (%s, %s, %s);
-    """, ("Error_test", "Gato", 9999))  # tutor_id 9999 no existe → FK error
+        INSERT INTO consultas_veterinarias
+               (fecha_consulta, motivo, costo, tutor_id, mascota_id, veterinario_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING id_consulta;
+    """, ("2026-06-22", "Control anual", 25.00, 1, 1, 1))
+    id_consulta = cursor.fetchone()[0]
 
-    conn.commit()
-    print("Insertado")
+    # Operación 2: el servicio aplicado, usando el id recién generado
+    cursor.execute("""
+        INSERT INTO consulta_servicios (consulta_id, servicio_id)
+        VALUES (%s, %s);
+    """, (id_consulta, 1))
+
+    conn.commit()   # confirma AMBAS a la vez
+    print(f"Consulta {id_consulta} y su servicio registrados juntos")
 
 except psycopg2.Error as e:
-    conn.rollback()  # cancela la transacción rota
-    print(f"Error: {e}")
-    print("Cambios revertidos")
+    conn.rollback()
+    print(f"Error: {e} → no se guardó nada")
 ```
 
-Esto inserta un tutor_id que no existe → PostgreSQL rechaza la FK → Python captura
-el error → `rollback()` limpia la transacción → la base queda intacta.
+### Versión que falla: comprueba el "todo o nada"
+
+Cambia el `servicio_id` de la operación 2 por uno que **no existe** (ej. `9999`):
+
+```python
+    cursor.execute("""
+        INSERT INTO consulta_servicios (consulta_id, servicio_id)
+        VALUES (%s, %s);
+    """, (id_consulta, 9999))   # 9999 no existe → falla la FK
+```
+
+La operación 1 (la consulta) se ejecutó sin problema, pero la operación 2 viola la
+FK → Python entra al `except` → `rollback()` **deshace las dos**.
+
+Verifica en pgAdmin que la consulta **tampoco** quedó:
+
+```sql
+SELECT * FROM consultas_veterinarias WHERE motivo = 'Control anual';
+-- 0 filas: el rollback borró también la operación 1
+```
+
+> 💡 Ese es el corazón de una transacción: no quedó una consulta "huérfana" sin su
+> servicio. O se guardan las dos, o ninguna.
+
+> 🔎 Atajo: `with conn:` confirma al salir del bloque sin error y hace `rollback()`
+> automático si salta una excepción. Por debajo es la misma transacción.
 
 ---
 
-## Paso 3.6 — 🧪 Tu turno: función de registro
+## Paso 3.6 — 🧪 Tu turno: función que agenda consulta + servicio
 
-Encapsula el INSERT de mascota en una función Python que reciba los datos como
-parámetros y devuelva el id generado.
+Encapsula las dos inserciones en una función `agendar_consulta(...)` que las haga en
+**una sola transacción** y devuelva el id de la consulta (o `None` si algo falló).
 
 <details>
 <summary>👀 Ver solución</summary>
 
 ```python
-def registrar_mascota(conn, nombre, especie, raza, fecha_nac, tutor_id):
+def agendar_consulta(conn, fecha, motivo, costo, tutor_id, mascota_id, vet_id, servicio_id):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO mascotas (nombre, especie, raza, fecha_nacimiento, tutor_id)
-            VALUES (%s, %s, %s, %s, %s)
-            RETURNING id_mascota;
-        """, (nombre, especie, raza, fecha_nac, tutor_id))
-        id_nuevo = cursor.fetchone()[0]
-        conn.commit()
-        return id_nuevo
+            INSERT INTO consultas_veterinarias
+                   (fecha_consulta, motivo, costo, tutor_id, mascota_id, veterinario_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id_consulta;
+        """, (fecha, motivo, costo, tutor_id, mascota_id, vet_id))
+        id_consulta = cursor.fetchone()[0]
+
+        cursor.execute("""
+            INSERT INTO consulta_servicios (consulta_id, servicio_id)
+            VALUES (%s, %s);
+        """, (id_consulta, servicio_id))
+
+        conn.commit()           # las dos operaciones, juntas
+        return id_consulta
     except psycopg2.Error as e:
-        conn.rollback()
-        print(f"Error al registrar: {e}")
+        conn.rollback()         # si una falla, se deshacen las dos
+        print(f"No se pudo agendar: {e}")
         return None
     finally:
         cursor.close()
@@ -183,12 +234,15 @@ def registrar_mascota(conn, nombre, especie, raza, fecha_nac, tutor_id):
 # Uso:
 conn = psycopg2.connect(host="localhost", database="veterinariadb",
                         user="postgres", password="1234")
-id_m = registrar_mascota(conn, "Luna", "Gato", "Siamés", "2021-06-01", 3)
-print(f"Nueva mascota id: {id_m}")
+id_c = agendar_consulta(conn, "2026-06-22", "Vacuna anual", 30.00, 2, 4, 1, 2)
+print(f"Nueva consulta id: {id_c}")
 conn.close()
 ```
 
 </details>
+
+> 🧹 Para dejar la base como estaba, vuelve a ejecutar
+> [`../04-admin-psql/setup.sql`](../../04-admin-psql/setup.sql) en pgAdmin.
 
 ---
 
@@ -201,14 +255,15 @@ conn.close()
 | UPDATE | `cursor.execute("UPDATE ...", (valor, id))` + `conn.commit()` |
 | DELETE | `cursor.execute("DELETE ...", (id,))` + `conn.commit()` |
 | Filas afectadas | `cursor.rowcount` |
-| Error + rollback | `try/except psycopg2.Error` + `conn.rollback()` |
+| Transacción atómica | varias operaciones + **un solo** `conn.commit()` |
+| Error + rollback | `try/except psycopg2.Error` + `conn.rollback()` deshace **todo** el bloque |
 
-> 📤 **Entrega:** `paso3.py` con el CRUD completo (INSERT + UPDATE + SELECT +
-> DELETE + manejo de error) + `paso3.png` con captura del output mostrando las
-> 4 operaciones.
+> 📤 **Entrega:** `paso3.py` con el CRUD (INSERT + UPDATE + SELECT + DELETE) y la
+> transacción de dos operaciones (consulta + servicio) con su `rollback()` +
+> `paso3.png` con captura del output.
 > Dónde ubicar los archivos: [Entrega](ENTREGA.md).
 
-> 🎓 **Has completado el Set 05.** Ahora sabes conectar Python a PostgreSQL y
-> hacer operaciones reales contra una base de datos.
-> En el [Set 06](../06-proyecto-propio/README.md) diseñas y construyes
+> 🎓 **Has completado el Set 06.** Ahora sabes conectar Python a PostgreSQL,
+> hacer operaciones reales y agruparlas en transacciones atómicas.
+> En el [Set 07](../07-proyecto-propio/README.md) diseñas y construyes
 > **tu propia base de datos** desde cero.

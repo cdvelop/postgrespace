@@ -1,4 +1,4 @@
-# 📤 Entrega del Set 05 — Python conectado a PostgreSQL
+# 📤 Entrega del Set 06 — Python conectado a PostgreSQL
 
 ---
 
@@ -8,7 +8,7 @@
 |---|---|---|
 | **Paso 1** | `paso1.py` + `paso1.png` | Script con listado de mascotas y conteo por especie; captura del output |
 | **Paso 2** | `paso2.py` + `paso2.png` | Script con búsqueda por especie, resumen de tutor e historial completo; captura del output |
-| **Paso 3** | `paso3.py` + `paso3.png` | Script con INSERT + UPDATE + SELECT + DELETE + manejo de error; captura del output |
+| **Paso 3** | `paso3.py` + `paso3.png` | Script con CRUD (INSERT/UPDATE/SELECT/DELETE) y una transacción de dos operaciones (consulta + servicio) con `rollback()`; captura del output |
 
 ---
 
@@ -17,7 +17,7 @@
 ```
 entregas/
 └── apellido_nombre/
-    └── 05-python-veterinaria/
+    └── 06-python-veterinaria/
         ├── paso1.py
         ├── paso1.png
         ├── paso2.py
@@ -31,7 +31,7 @@ entregas/
 ## Cómo ejecutar y capturar
 
 1. Crea el archivo `.py` en la ruta correcta desde VS Code.
-2. Ejecuta desde el terminal: `python3 entregas/apellido_nombre/05-python-veterinaria/pasoN.py`
+2. Ejecuta desde el terminal: `python3 entregas/apellido_nombre/06-python-veterinaria/pasoN.py`
 3. Toma captura del output en la terminal y guárdala como `pasoN.png`.
 
 ---

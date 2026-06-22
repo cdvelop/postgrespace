@@ -15,7 +15,7 @@ simple a lo más completo, sobre un caso práctico. Hazlos en orden.
 | 03 | **[Haciendo crecer el modelo](03-modelo-crece/README.md)** | Amplías la veterinaria con veterinarios y servicios | `ALTER TABLE`, `CHECK`/`DEFAULT`/`UNIQUE`, relación N:M con tabla puente, JOIN de varias tablas |
 | 04 | **[psql, usuarios y backup](04-admin-psql/README.md)** | Administras la base desde la terminal | `psql`, `CREATE USER`, `GRANT`, `REVOKE`, `pg_dump`, restauración |
 | 05 | **[Vistas, funciones y procedimientos](05-logica-servidor/README.md)** | Lógica que vive en el servidor | `CREATE VIEW`, `CREATE FUNCTION`, `CREATE PROCEDURE`, `LANGUAGE plpgsql`, `CALL` |
-| 06 | **[Python conectado a PostgreSQL](06-python-veterinaria/README.md)** | Consultas y CRUD desde un script Python | `psycopg2`, `cursor.execute()`, `fetchall()`, `commit()`, `rollback()`, parámetros seguros |
+| 06 | **[Python conectado a PostgreSQL](06-python-veterinaria/README.md)** | Consultas y CRUD desde un script Python | `psycopg2`, `cursor.execute()`, `fetchall()`, transacciones atómicas (`commit()`/`rollback()`), parámetros seguros |
 | 07 | **[Proyecto propio](07-proyecto-propio/README.md)** | Diseñas y construyes una base de datos desde cero | Diseño relacional autónomo, script de inicialización, documentación |
 
 ## Cómo se organizan las entregas
