@@ -41,8 +41,29 @@ siendo válida y pgAdmin carga sin problemas — por eso el bug solo se ve en la
 
 ## Solución aplicada
 
-Desactivar `ENHANCED_COOKIE_PROTECTION` en el contenedor de pgAdmin mediante la variable de
-entorno `PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION`:
+La solución tiene **dos partes**. La primera no fue suficiente por sí sola; la página seguía
+quedando en blanco con errores **401** en las peticiones autenticadas del SPA
+(`preferences/get_all`, `misc/bgprocess/`, `browser/check_corrupted_db_file`).
+
+### Parte 1 — Desactivar `ENHANCED_COOKIE_PROTECTION`
+
+Ataca la rotación de IP descrita arriba: la cookie deja de validarse contra la IP del cliente.
+
+### Parte 2 — Atributos de cookie para el proxy HTTPS
+
+El 401 tras el login indica que la cookie de sesión **no viaja** en las XHR del SPA. Tras el
+proxy HTTPS de Codespaces (`*.app.github.dev`), con los valores por defecto
+(`SameSite=Lax`, sin `Secure`) el navegador no adjunta la cookie a esas peticiones, así que:
+
+- El **login** funciona (esa petición sí lleva la cookie en la navegación de nivel superior).
+- Las **peticiones de la aplicación** salen sin cookie → el servidor responde **401** → el
+  SPA no recibe datos → **página en blanco**.
+
+La cookie necesita `SameSite=None; Secure` para enviarse en ese contexto. `Secure=True` es
+correcto porque Codespaces web siempre sirve por HTTPS (y los navegadores modernos también
+envían cookies `Secure` a `http://localhost`, así que no rompe VS Code de escritorio).
+
+### Configuración final
 
 ```yaml
 pgadmin:
@@ -51,15 +72,18 @@ pgadmin:
     PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
     PGADMIN_DEFAULT_PASSWORD: 1234
     PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+    PGADMIN_CONFIG_SESSION_COOKIE_SECURE: "True"
+    PGADMIN_CONFIG_SESSION_COOKIE_SAMESITE: "'None'"
 ```
 
-> **Formato:** las variables `PGADMIN_CONFIG_*` inyectan valores en el `config_local.py` de
-> pgAdmin. El valor debe escribirse como literal de Python entre comillas (`"False"`), no
-> como booleano de YAML.
+> **Formato:** las variables `PGADMIN_CONFIG_*` inyectan el valor **verbatim como literal de
+> Python** en el `config_local.py` de pgAdmin. Por eso `"False"`/`"True"` se escriben como
+> booleanos de Python, y `SESSION_COOKIE_SAMESITE` lleva comillas internas (`"'None'"`) para
+> que llegue como la **cadena** `'None'` y no como el objeto `None` (que omitiría el atributo).
 
-Con la protección desactivada, la cookie de sesión deja de validarse contra la IP del
-cliente, por lo que sobrevive al reenvío a través del proxy de GitHub y la interfaz de
-pgAdmin carga correctamente también en la versión web de Codespaces.
+Con las dos partes aplicadas, la cookie sobrevive al reenvío del proxy de GitHub y se envía en
+todas las peticiones, por lo que la interfaz de pgAdmin carga correctamente en la versión web
+de Codespaces.
 
 ## Nota de seguridad
 
@@ -78,7 +102,11 @@ la protección.
 
 - [x] Causa raíz identificada: `ENHANCED_COOKIE_PROTECTION` ata la cookie a la IP, que rota
       tras el proxy de GitHub en la versión web.
+- [x] Causa del 401 residual identificada: la cookie sin `SameSite=None; Secure` no viaja en
+      las XHR del SPA tras el proxy HTTPS → 401 → página en blanco.
 - [x] Diferencia VS Code escritorio (túnel localhost, IP estable) vs web (proxy, IP rotante)
       documentada.
 - [x] `PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"` añadido en `docker-compose.yml`.
+- [x] `PGADMIN_CONFIG_SESSION_COOKIE_SECURE: "True"` y
+      `PGADMIN_CONFIG_SESSION_COOKIE_SAMESITE: "'None'"` añadidos en `docker-compose.yml`.
 - [x] Nota de seguridad sobre el alcance del cambio incluida.

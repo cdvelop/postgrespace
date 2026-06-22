@@ -36,6 +36,12 @@ services:
       PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
       PGADMIN_DEFAULT_PASSWORD: 1234
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      # Tras el proxy HTTPS de Codespaces la cookie de sesion necesita
+      # SameSite=None; Secure para viajar en las peticiones del SPA. Sin esto,
+      # el login funciona pero las XHR autenticadas devuelven 401 y la pagina
+      # queda en blanco. Los valores son literales de Python (verbatim).
+      PGADMIN_CONFIG_SESSION_COOKIE_SECURE: "True"
+      PGADMIN_CONFIG_SESSION_COOKIE_SAMESITE: "'None'"
     ports:
       - "5050:80"
     volumes:
