@@ -1,69 +1,55 @@
 # Bug: pgAdmin se queda en blanco tras el login en Codespaces (versión web)
 
-> **Estado: RESUELTO** — solución aplicada en `.devcontainer/docker-compose.yml`.
+> **Estado: RESUELTO** — solución final: hacer que pgAdmin confíe en las cabeceras
+> `X-Forwarded-*` del proxy de Codespaces (**ProxyFix**: `PROXY_X_PROTO_COUNT`/`HOST_COUNT`/
+> `PREFIX_COUNT`) en `.devcontainer/docker-compose.yml`. Los intentos previos (cookies y modo
+> escritorio por sí solo) **no** funcionaron; se documentan abajo para no repetirlos.
 
 ## Síntoma
 
 Al abrir el Codespace **desde el navegador** (VS Code web), pgAdmin se forwardea en el
-puerto `5050` y se ve correctamente la **pantalla de login**. Tras introducir las
-credenciales y pulsar *Login*:
+puerto `5050` y carga, pero la interfaz (árbol de servidores, menús) **se queda en blanco**.
+En la consola del navegador, las peticiones **XHR** a `preferences/get_all`, `misc/bgprocess/`,
+`status`, `browser/check_corrupted_db_file`, `llm/status` devuelven **401 (Unauthorized)**,
+mientras los archivos estáticos (`app.bundle.js`, etc.) cargan con **200**.
 
-- La página se queda **completamente en blanco**.
-- La interfaz de pgAdmin (árbol de servidores, menús, etc.) **no carga**.
-
-Este problema **no ocurre** cuando se usa **VS Code de escritorio** (instalado en la
-máquina host) abriendo el mismo Codespace: ahí pgAdmin carga con normalidad después del
-login.
+Este problema **no ocurre** con **VS Code de escritorio** abriendo el mismo Codespace: ahí
+pgAdmin carga con normalidad.
 
 ## Causa raíz
 
-La diferencia está en **cómo se reenvía el puerto** según el cliente:
+El proxy de GitHub (`*.app.github.dev`) **termina el TLS** y reenvía a pgAdmin por HTTP
+plano. Por defecto pgAdmin (Flask) **no confía** en las cabeceras `X-Forwarded-*` del proxy,
+así que ve la petición como **HTTP** y con el host/esquema equivocados. En ese escenario
+genera mal la **cookie de sesión** (y las URLs), por lo que no hay una sesión válida:
 
-| Cliente | Cómo llega el tráfico a pgAdmin | IP del cliente |
-|---|---|---|
-| **VS Code escritorio** | Túnel SSH directo a `localhost` | Estable (siempre la misma) |
-| **VS Code web (Codespaces)** | Proxy de GitHub (`*.app.github.dev`) | Puede **rotar** entre IPs |
+- Los archivos **estáticos** cargan con **200** (no requieren sesión).
+- Las **XHR autenticadas** del SPA devuelven **401** → el SPA no recibe datos → **página en blanco**.
 
-pgAdmin trae activada por defecto la opción **`ENHANCED_COOKIE_PROTECTION`**. Esta función
-ata la cookie de sesión a la **IP del cliente** (y al user-agent) como medida anti-secuestro
-de sesión.
+Con VS Code de escritorio el túnel `localhost` no mete un proxy que rompa el esquema, por eso
+el bug solo se veía en la versión web.
 
-Cuando se accede a través del proxy de GitHub, las peticiones posteriores al login pueden
-salir con una **IP distinta** a la que generó la cookie. pgAdmin detecta el cambio de IP,
-considera la sesión inválida y **rechaza las peticiones de la aplicación (SPA)**:
+> Las XHR son del **mismo origen** que la página, por lo que el atributo `SameSite` de la
+> cookie **no** es el problema. El problema es que pgAdmin, al no saber que detrás hay un proxy
+> HTTPS, no establece una cookie de sesión utilizable.
 
-- La página de **login** se renderiza porque **no necesita sesión válida**.
-- Tras autenticarse, cada petición de datos de la interfaz devuelve un rechazo/redirección
-  → el SPA no recibe contenido → **página en blanco**.
+## Intentos que NO funcionaron
 
-Con VS Code de escritorio el túnel `localhost` mantiene una IP constante, la cookie sigue
-siendo válida y pgAdmin carga sin problemas — por eso el bug solo se ve en la versión web.
+Se documentan para no repetirlos:
 
-## Solución aplicada
+1. **`ENHANCED_COOKIE_PROTECTION: "False"`** — atacaba una supuesta rotación de IP. No
+   resolvió el 401.
+2. **`SESSION_COOKIE_SECURE: "True"` + `SESSION_COOKIE_SAMESITE: "'None'"`** — `SameSite` no
+   aplica a peticiones de mismo origen, así que tampoco resolvió nada.
+3. **Modo escritorio (`SERVER_MODE=False`) por sí solo** — quita la *pantalla* de login, pero
+   pgAdmin hace **auto-login** y sigue usando una sesión con cookie. El 401 persistió igual.
+   (Se mantiene, ver abajo, porque simplifica el uso, pero no es lo que arregla el bug.)
 
-La solución tiene **dos partes**. La primera no fue suficiente por sí sola; la página seguía
-quedando en blanco con errores **401** en las peticiones autenticadas del SPA
-(`preferences/get_all`, `misc/bgprocess/`, `browser/check_corrupted_db_file`).
+## Solución aplicada — ProxyFix
 
-### Parte 1 — Desactivar `ENHANCED_COOKIE_PROTECTION`
-
-Ataca la rotación de IP descrita arriba: la cookie deja de validarse contra la IP del cliente.
-
-### Parte 2 — Atributos de cookie para el proxy HTTPS
-
-El 401 tras el login indica que la cookie de sesión **no viaja** en las XHR del SPA. Tras el
-proxy HTTPS de Codespaces (`*.app.github.dev`), con los valores por defecto
-(`SameSite=Lax`, sin `Secure`) el navegador no adjunta la cookie a esas peticiones, así que:
-
-- El **login** funciona (esa petición sí lleva la cookie en la navegación de nivel superior).
-- Las **peticiones de la aplicación** salen sin cookie → el servidor responde **401** → el
-  SPA no recibe datos → **página en blanco**.
-
-La cookie necesita `SameSite=None; Secure` para enviarse en ese contexto. `Secure=True` es
-correcto porque Codespaces web siempre sirve por HTTPS (y los navegadores modernos también
-envían cookies `Secure` a `http://localhost`, así que no rompe VS Code de escritorio).
-
-### Configuración final
+Hay que decirle a pgAdmin que está detrás de **un** proxy de confianza para que lea las
+cabeceras `X-Forwarded-Proto`/`Host`/`Prefix` y reconstruya el esquema (https) y host reales.
+Con eso genera la cookie de sesión correctamente y las XHR dejan de dar 401:
 
 ```yaml
 pgadmin:
@@ -71,42 +57,44 @@ pgadmin:
   environment:
     PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
     PGADMIN_DEFAULT_PASSWORD: 1234
-    PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
-    PGADMIN_CONFIG_SESSION_COOKIE_SECURE: "True"
-    PGADMIN_CONFIG_SESSION_COOKIE_SAMESITE: "'None'"
+    # Modo escritorio (sin login) — opcional, por comodidad
+    PGADMIN_CONFIG_SERVER_MODE: "False"
+    PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    # Lo que de verdad arregla el 401 tras el proxy de Codespaces:
+    PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: 1
+    PGADMIN_CONFIG_PROXY_X_HOST_COUNT: 1
+    PGADMIN_CONFIG_PROXY_X_PREFIX_COUNT: 1
 ```
 
-> **Formato:** las variables `PGADMIN_CONFIG_*` inyectan el valor **verbatim como literal de
-> Python** en el `config_local.py` de pgAdmin. Por eso `"False"`/`"True"` se escriben como
-> booleanos de Python, y `SESSION_COOKIE_SAMESITE` lleva comillas internas (`"'None'"`) para
-> que llegue como la **cadena** `'None'` y no como el objeto `None` (que omitiría el atributo).
+> **Notas:**
+> - `*_COUNT: 1` = confía en 1 salto de proxy (el de GitHub). No usar valores mayores: confiar
+>   en cabeceras de más saltos de los reales es un riesgo de *spoofing*.
+> - `PGADMIN_DEFAULT_EMAIL`/`PASSWORD` siguen siendo necesarios: el *entrypoint* del contenedor
+>   los exige aunque haya modo escritorio.
+> - Las variables `PGADMIN_CONFIG_*` se inyectan **verbatim como literal de Python** en el
+>   `config_local.py`; por eso los enteros van sin comillas (`1`) y los booleanos como `"False"`.
 
-Con las dos partes aplicadas, la cookie sobrevive al reenvío del proxy de GitHub y se envía en
-todas las peticiones, por lo que la interfaz de pgAdmin carga correctamente en la versión web
-de Codespaces.
+## Si aún así falla: visibilidad del puerto
+
+Los puertos reenviados de Codespaces son **privados** por defecto y exigen autenticación; en
+algunos casos las peticiones XHR no la superan y devuelven 401. Si tras el ProxyFix sigue
+fallando, en la pestaña **Ports** cambia la visibilidad del puerto **5050** a **Public**
+(los puertos públicos no requieren esa autenticación). Alternativa siempre fiable: abrir el
+Codespace en **VS Code de escritorio**, donde no hay proxy que rompa el esquema.
 
 ## Nota de seguridad
 
-`ENHANCED_COOKIE_PROTECTION` es una defensa adicional opcional. Desactivarla es **seguro y
-aceptable en este entorno educativo**, donde:
-
-- pgAdmin solo es accesible a través del puerto privado reenviado del propio Codespace del
-  alumno (no es público).
-- Las credenciales son de un laboratorio local (`postgres` / `1234`), no de producción.
-
-En un despliegue de producción detrás de un proxy se recomendaría, en su lugar, configurar
-correctamente las cabeceras `X-Forwarded-For` y el `ProxyFix` de pgAdmin en vez de desactivar
-la protección.
+- Confiar en `X-Forwarded-*` con `*_COUNT: 1` es correcto: hay exactamente un proxy (GitHub).
+- El modo escritorio desactiva el login de pgAdmin. Es aceptable aquí (puerto privado del
+  propio Codespace, lab local de un usuario, credenciales `postgres`/`1234`). En producción
+  **no** se usa: ahí va modo servidor + proxy bien configurado.
 
 ## Checklist
 
-- [x] Causa raíz identificada: `ENHANCED_COOKIE_PROTECTION` ata la cookie a la IP, que rota
-      tras el proxy de GitHub en la versión web.
-- [x] Causa del 401 residual identificada: la cookie sin `SameSite=None; Secure` no viaja en
-      las XHR del SPA tras el proxy HTTPS → 401 → página en blanco.
-- [x] Diferencia VS Code escritorio (túnel localhost, IP estable) vs web (proxy, IP rotante)
-      documentada.
-- [x] `PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"` añadido en `docker-compose.yml`.
-- [x] `PGADMIN_CONFIG_SESSION_COOKIE_SECURE: "True"` y
-      `PGADMIN_CONFIG_SESSION_COOKIE_SAMESITE: "'None'"` añadidos en `docker-compose.yml`.
-- [x] Nota de seguridad sobre el alcance del cambio incluida.
+- [x] Causa raíz real: pgAdmin no confía en `X-Forwarded-*`, ve HTTP/host erróneo y genera mal
+      la cookie de sesión → XHR autenticadas con 401 → página en blanco (estáticos 200).
+- [x] Descartado `SameSite` (XHR de mismo origen), rotación de IP y "quitar el login"
+      (auto-login sigue usando cookie).
+- [x] `PROXY_X_PROTO_COUNT`/`HOST_COUNT`/`PREFIX_COUNT = 1` aplicados en `docker-compose.yml`.
+- [x] Documentado el *fallback* de puerto público / VS Code escritorio.
+- [x] Nota de seguridad incluida.
