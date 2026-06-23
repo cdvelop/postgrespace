@@ -10,8 +10,6 @@
     }
   },
 
-  "postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y postgresql-client python3 python3-pip python3-psycopg2",
-
   "remoteEnv": {
     "PGHOST": "postgres",
     "PGUSER": "postgres",
@@ -21,7 +19,7 @@
 
   "runServices": [
     "postgres",
-    "pgadmin"
+    "pgweb"
   ],
 
   "forwardPorts": [
@@ -31,7 +29,7 @@
 
   "portsAttributes": {
     "5050": {
-      "label": "pgAdmin",
+      "label": "pgweb",
       "onAutoForward": "openBrowser"
     }
   },

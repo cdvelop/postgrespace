@@ -5,13 +5,15 @@ networks:
 services:
 
   workspace:
-    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: sleep infinity
     networks:
       - pgnet
 
   postgres:
-    image: postgres:16
+    image: postgres:15-alpine
     restart: unless-stopped
     command: ["postgres", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
     environment:
@@ -26,34 +28,15 @@ services:
     networks:
       - pgnet
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
+  pgweb:
+    image: sosedoff/pgweb:0.16.2
     restart: unless-stopped
-    user: root
     environment:
-      PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
-      PGADMIN_DEFAULT_PASSWORD: 1234
-      # pgAdmin corre detras del proxy de Codespaces, que TERMINA el TLS y le
-      # reenvia por HTTP. Sin esto pgAdmin cree que la peticion es HTTP, genera
-      # mal la cookie de sesion/URLs y las XHR autenticadas (preferences/get_all,
-      # misc/bgprocess, status...) dan 401 -> pagina en blanco (los estaticos si
-      # cargan, por eso 200). Estas variables activan el ProxyFix: pgAdmin confia
-      # en las cabeceras X-Forwarded-* del proxy (1 salto) y reconstruye el
-      # esquema (https) y host reales.
-      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: 1
-      PGADMIN_CONFIG_PROXY_X_HOST_COUNT: 1
-      PGADMIN_CONFIG_PROXY_X_PREFIX_COUNT: 1
+      # Conexión automática al iniciar — los alumnos abren la UI ya conectada
+      DATABASE_URL: "postgres://postgres:1234@postgres:5432/postgres?sslmode=disable"
     ports:
-      - "5050:80"
-    volumes:
-      # Pre-registra el servidor PostgreSQL: los alumnos no tienen que
-      # registrarlo a mano, ya aparece bajo "Servers" al abrir pgAdmin.
-      - ./pgadmin/servers.json:/pgadmin4/servers.json
-      - ./pgadmin/pgpassfile:/pgpassfile
-      # Montar data/ directamente sobre el subdirectorio del usuario de pgAdmin.
-      # pgAdmin escribe los backups en /var/lib/pgadmin/storage/postgres_sql.dev/
-      # y como ese path ya existe como mount point, no intenta crearlo ni hacerle chmod 700.
-      # Resultado: los archivos quedan en data/ sin subcarpeta intermedia.
-      - ../data:/var/lib/pgadmin/storage/postgres_sql.dev
+      - "5050:8081"
+    depends_on:
+      - postgres
     networks:
       - pgnet
