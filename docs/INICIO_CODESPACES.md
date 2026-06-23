@@ -7,10 +7,9 @@ No necesitas instalar PostgreSQL ni pgAdmin: todo corre en la nube.
 
 * Cuenta de GitHub.
 * Acceso a GitHub Codespaces.
-* **[Visual Studio Code](https://code.visualstudio.com/) instalado** en tu computador. El
-  laboratorio se abre con **Open in Visual Studio Code**, ya que iniciar el Codespace
-  directamente en el navegador suele dar problemas (la carga y el inicio de sesión de pgAdmin
-  fallan con frecuencia).
+* (Opcional) **[Visual Studio Code](https://code.visualstudio.com/) instalado** en tu
+  computador. El laboratorio funciona **directamente en el navegador**, incluido pgAdmin.
+  Abrirlo en VS Code de escritorio es solo una alternativa, algo más estable, si la prefieres.
 
 ---
 
@@ -51,19 +50,18 @@ Haz clic en **Fork** para crear una copia de este repositorio en tu cuenta de Gi
 
 La primera creación puede tardar algunos minutos mientras GitHub prepara el entorno.
 
-Al crear el Codespace, GitHub lo abrirá **automáticamente en el navegador**. Esta versión web
-suele dar problemas (la carga inicial y el inicio de sesión de pgAdmin fallan con frecuencia),
-así que **no trabajes aquí, cierra esa pestaña**: en el siguiente paso lo abriremos en Visual
-Studio Code.
+Al crear el Codespace, GitHub lo abrirá **automáticamente en el navegador**. Puedes
+**trabajar aquí mismo**: la versión web ya funciona, pgAdmin incluido. Si prefieres un entorno
+más estable, el paso 3 (opcional) muestra cómo abrirlo en VS Code de escritorio.
 
 > **¿Qué es Codespaces?** — [Lee la documentación](CODESPACES.md)
 
 ---
 
-## 3. Abrir el Codespace en Visual Studio Code
+## 3. (Opcional) Abrir el Codespace en Visual Studio Code
 
-Aunque el Codespace se haya abierto en el navegador, ábrelo en la aplicación de escritorio,
-que es mucho más estable:
+Puedes hacer todo el laboratorio en el navegador. Si prefieres la aplicación de escritorio
+(algo más estable), ábrela así:
 
 1. En la pestaña del navegador, abre el menú (☰) en la esquina superior izquierda.
 2. Selecciona **Open in Visual Studio Code**.
@@ -169,8 +167,8 @@ Todo listo. Abre el catálogo de ejercicios y empieza por el primer set:
 
 1. Espera unos segundos y vuelve a intentarlo.
 2. Verifica que el Codespace haya terminado de iniciarse.
-3. Si utilizas la versión web y sigue fallando, abre el Codespace mediante **Open in Visual
-   Studio Code** y vuelve a abrir el puerto desde la pestaña **Ports**.
+3. Si sigue fallando, en la pestaña **Ports** cambia la visibilidad del puerto **pgAdmin** a
+   **Public**, o abre el Codespace en **VS Code de escritorio**.
 
 ### No puedo conectarme al servidor
 
