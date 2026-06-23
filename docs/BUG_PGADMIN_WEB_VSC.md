@@ -1,9 +1,10 @@
 # Bug: pgAdmin se queda en blanco tras el login en Codespaces (versión web)
 
-> **Estado: RESUELTO** — solución final: hacer que pgAdmin confíe en las cabeceras
-> `X-Forwarded-*` del proxy de Codespaces (**ProxyFix**: `PROXY_X_PROTO_COUNT`/`HOST_COUNT`/
-> `PREFIX_COUNT`) en `.devcontainer/docker-compose.yml`. Los intentos previos (cookies y modo
-> escritorio por sí solo) **no** funcionaron; se documentan abajo para no repetirlos.
+> **Estado: RESUELTO** — solución final: **modo servidor** (por defecto) + **ProxyFix**
+> (`PROXY_X_PROTO_COUNT`/`HOST_COUNT`/`PREFIX_COUNT`) en `.devcontainer/docker-compose.yml`,
+> para que pgAdmin confíe en las cabeceras `X-Forwarded-*` del proxy de Codespaces. Los intentos
+> previos (cookies, y modo escritorio —que además rompía los backups—) **no** sirvieron; se
+> documentan abajo para no repetirlos.
 
 ## Síntoma
 
@@ -41,15 +42,19 @@ Se documentan para no repetirlos:
    resolvió el 401.
 2. **`SESSION_COOKIE_SECURE: "True"` + `SESSION_COOKIE_SAMESITE: "'None'"`** — `SameSite` no
    aplica a peticiones de mismo origen, así que tampoco resolvió nada.
-3. **Modo escritorio (`SERVER_MODE=False`) por sí solo** — quita la *pantalla* de login, pero
-   pgAdmin hace **auto-login** y sigue usando una sesión con cookie. El 401 persistió igual.
-   (Se mantiene, ver abajo, porque simplifica el uso, pero no es lo que arregla el bug.)
+3. **Modo escritorio (`SERVER_MODE=False`)** — quita la *pantalla* de login, pero pgAdmin hace
+   **auto-login** y sigue usando una sesión con cookie, así que el 401 persistió igual. Encima
+   **rompió los backups**: en modo escritorio el explorador de archivos deja de estar acotado al
+   directorio de almacenamiento del usuario (montado a `data/`) y apunta al filesystem real
+   (`/home/`), donde el proceso no tiene permisos → `[Errno 13] Permission denied`. Se **revirtió**.
 
-## Solución aplicada — ProxyFix
+## Solución aplicada — ProxyFix (en modo servidor)
 
 Hay que decirle a pgAdmin que está detrás de **un** proxy de confianza para que lea las
 cabeceras `X-Forwarded-Proto`/`Host`/`Prefix` y reconstruya el esquema (https) y host reales.
-Con eso genera la cookie de sesión correctamente y las XHR dejan de dar 401:
+Con eso genera la cookie de sesión correctamente y las XHR dejan de dar 401 — **manteniendo el
+modo servidor** (con su login y su sandbox de almacenamiento, que es lo que hace que los
+backups sigan yendo a `data/`):
 
 ```yaml
 pgadmin:
@@ -57,22 +62,23 @@ pgadmin:
   environment:
     PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
     PGADMIN_DEFAULT_PASSWORD: 1234
-    # Modo escritorio (sin login) — opcional, por comodidad
-    PGADMIN_CONFIG_SERVER_MODE: "False"
-    PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-    # Lo que de verdad arregla el 401 tras el proxy de Codespaces:
+    # Lo que arregla el 401 tras el proxy de Codespaces:
     PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: 1
     PGADMIN_CONFIG_PROXY_X_HOST_COUNT: 1
     PGADMIN_CONFIG_PROXY_X_PREFIX_COUNT: 1
 ```
 
+Con el ProxyFix, el **login de pgAdmin funciona también en la versión web**, por lo que ya no
+es obligatorio abrir el Codespace en VS Code de escritorio.
+
 > **Notas:**
 > - `*_COUNT: 1` = confía en 1 salto de proxy (el de GitHub). No usar valores mayores: confiar
 >   en cabeceras de más saltos de los reales es un riesgo de *spoofing*.
-> - `PGADMIN_DEFAULT_EMAIL`/`PASSWORD` siguen siendo necesarios: el *entrypoint* del contenedor
->   los exige aunque haya modo escritorio.
+> - Se mantiene el **modo servidor** (por defecto). Es lo que conserva el sandbox del explorador
+>   de archivos en `/var/lib/pgadmin/storage/postgres_sql.dev` (montado a `../data`), de modo
+>   que los backups se guardan en `data/` como siempre.
 > - Las variables `PGADMIN_CONFIG_*` se inyectan **verbatim como literal de Python** en el
->   `config_local.py`; por eso los enteros van sin comillas (`1`) y los booleanos como `"False"`.
+>   `config_local.py`; por eso los enteros van sin comillas (`1`).
 
 ## Si aún así falla: visibilidad del puerto
 
@@ -85,9 +91,7 @@ Codespace en **VS Code de escritorio**, donde no hay proxy que rompa el esquema.
 ## Nota de seguridad
 
 - Confiar en `X-Forwarded-*` con `*_COUNT: 1` es correcto: hay exactamente un proxy (GitHub).
-- El modo escritorio desactiva el login de pgAdmin. Es aceptable aquí (puerto privado del
-  propio Codespace, lab local de un usuario, credenciales `postgres`/`1234`). En producción
-  **no** se usa: ahí va modo servidor + proxy bien configurado.
+- Se mantiene el modo servidor con login; no se baja ninguna defensa relevante para este lab.
 
 ## Checklist
 
@@ -96,5 +100,6 @@ Codespace en **VS Code de escritorio**, donde no hay proxy que rompa el esquema.
 - [x] Descartado `SameSite` (XHR de mismo origen), rotación de IP y "quitar el login"
       (auto-login sigue usando cookie).
 - [x] `PROXY_X_PROTO_COUNT`/`HOST_COUNT`/`PREFIX_COUNT = 1` aplicados en `docker-compose.yml`.
+- [x] Modo escritorio revertido (rompía los backups) → se mantiene el modo servidor.
 - [x] Documentado el *fallback* de puerto público / VS Code escritorio.
 - [x] Nota de seguridad incluida.
