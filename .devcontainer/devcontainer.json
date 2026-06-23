@@ -19,7 +19,7 @@
 
   "runServices": [
     "postgres",
-    "pgweb"
+    "pgadmin"
   ],
 
   "forwardPorts": [
@@ -29,7 +29,7 @@
 
   "portsAttributes": {
     "5050": {
-      "label": "pgweb",
+      "label": "pgAdmin",
       "onAutoForward": "openBrowser"
     }
   },

@@ -28,14 +28,27 @@ services:
     networks:
       - pgnet
 
-  pgweb:
-    image: sosedoff/pgweb:0.16.2
+  pgadmin:
+    image: dpage/pgadmin4:9.16
     restart: unless-stopped
+    user: root
     environment:
-      # Conexión automática al iniciar — los alumnos abren la UI ya conectada
-      DATABASE_URL: "postgres://postgres:1234@postgres:5432/postgres?sslmode=disable"
+      PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
+      PGADMIN_DEFAULT_PASSWORD: 1234
+      # pgAdmin corre detrás del proxy de Codespaces, que TERMINA el TLS y le
+      # reenvía por HTTP. Sin esto pgAdmin cree que la petición es HTTP, genera
+      # mal la cookie de sesión/URLs y las XHR autenticadas dan 401.
+      # Estas variables activan el ProxyFix: pgAdmin confía en las cabeceras
+      # X-Forwarded-* del proxy (1 salto) y reconstruye el esquema (https) real.
+      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: 1
+      PGADMIN_CONFIG_PROXY_X_HOST_COUNT: 1
+      PGADMIN_CONFIG_PROXY_X_PREFIX_COUNT: 1
     ports:
-      - "5050:8081"
+      - "5050:80"
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+      - ./pgadmin/pgpassfile:/pgpassfile
+      - ../data:/var/lib/pgadmin/storage/postgres_sql.dev
     depends_on:
       - postgres
     networks:
