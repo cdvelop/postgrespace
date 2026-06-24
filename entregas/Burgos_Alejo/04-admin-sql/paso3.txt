@@ -1,0 +1,126 @@
+> psql -U postgres -c "
+> SELECT pg_terminate_backend(pid)
+> FROM pg_stat_activity
+> WHERE datname = 'veterinariadb' AND pid <> pg_backend_pid();
+> "
+Contraseña para usuario postgres: 
+
+ pg_terminate_backend                                                                                    
+----------------------
+ t
+ t
+(2 filas)
+
+> psql -U postgres -c "DROP DATABASE veterinariadb;"
+Contraseña para usuario postgres: 
+
+DROP DATABASE
+
+> psql -U postgres -c "CREATE DATABASE veterinariadb;"
+Contraseña para usuario postgres: 
+
+CREATE DATABASE
+
+>psql -U postgres -d veterinariadb < entregas/Burgos_Alejo/04-procedimientos-psql/paso3_backup.sql
+Contraseña para usuario postgres:
+
+SET
+SET
+SET
+SET
+SET
+SET
+ set_config
+------------
+
+(1 fila)
+
+SET
+SET
+SET
+SET
+SET
+SET
+CREATE TABLE
+ALTER TABLE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+COPY 15
+COPY 9
+COPY 8
+COPY 6
+COPY 4
+COPY 3
+ setval
+--------
+      9
+(1 fila)
+
+ setval
+--------
+      8
+(1 fila)
+
+ setval
+--------
+      6
+(1 fila)
+
+ setval
+--------
+      4
+(1 fila)
+
+ setval
+--------
+      3
+(1 fila)
+
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+
+>psql -U postgres -d veterinariadb -c "SELECT id_mascota, nombre FROM mascotas WHERE id_mascota = 1;"
+Contraseña para usuario postgres:
+
+ id_mascota |  nombre
+------------+----------
+          1 | Firulais
+(1 fila)

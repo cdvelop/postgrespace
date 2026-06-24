@@ -1,0 +1,131 @@
+C:\Users\tmart>"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -c "DROP DATABASE veterinariadb;"
+DROP DATABASE
+
+C:\Users\tmart>"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -c "\l"
+                                                                      Listado de base de datos                                               
+  Nombre   |  Due±o   | Codificaci¾n | Proveedor de locale |      Collate       |       Ctype        | Configuraci¾n regional | Reglas ICU: |      Privilegios      
+-----------+----------+--------------+---------------------+--------------------+--------------------+------------------------+-------------+-----------------------
+ DATA_TAMA | postgres | UTF8         | libc                | Spanish_Chile.1252 | Spanish_Chile.1252 |                        |             |  postgres  | postgres | UTF8         | libc                | Spanish_Chile.1252 | Spanish_Chile.1252 |                        |             |  template0 | postgres | UTF8         | libc                | Spanish_Chile.1252 | Spanish_Chile.1252 |                        |             | =c/postgres          +
+           |          |              |                     |                    |                    |                        |             | postgres=CTc/postgres
+ template1 | postgres | UTF8         | libc                | Spanish_Chile.1252 | Spanish_Chile.1252 |                        |             | =c/postgres          +
+           |          |              |                     |                    |                    |                        |             | postgres=CTc/postgres
+(4 filas)
+
+
+
+C:\Users\tmart>"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -c "CREATE DATABASE veterinariadb;"
+CREATE DATABASE
+
+C:\Users\tmart>"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -d veterinariadb < entregas/martinez_tamara/04-procedimientos-psql/paso3_backup.sql
+SET
+SET
+SET
+SET
+SET
+SET
+ set_config 
+------------
+ 
+(1 fila)
+
+SET
+SET
+SET
+SET
+SET
+SET
+CREATE TABLE
+ALTER TABLE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+COPY 15
+COPY 9
+COPY 8
+COPY 6
+COPY 4
+COPY 3
+ setval 
+--------
+      9
+(1 fila)
+
+ setval 
+--------
+      9
+(1 fila)
+
+ setval 
+--------
+      6
+(1 fila)
+
+ setval 
+--------
+      4
+(1 fila)
+
+ setval 
+--------
+      3
+(1 fila)
+
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+
+C:\Users\tmart>"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -d veterinariadb -c "SELECT id_mascota, nombre FROM mascotas WHERE id_mascota = 1;"
+ id_mascota |  nombre                                                                                                                        
+------------+----------
+          1 | Firulais
+(1 fila)
+
+
+
+C:\Users\tmart>"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -d veterinariadb -c "SELECT (SELECT COUNT(*) FROM tutores) AS tutores, (SELECT COUNT(*) FROM mascotas) AS mascotas, (SELECT COUNT(*) FROM veterinarios) AS veterinarios, (SELECT COUNT(*) FROM consultas_veterinarias) AS consultas, (SELECT COUNT(*) FROM servicios) AS servicios, (SELECT COUNT(*) FROM consulta_servicios) AS relaciones;"
+ tutores | mascotas | veterinarios | consultas | servicios | relaciones                                                                      
+---------+----------+--------------+-----------+-----------+------------
+       4 |        8 |            3 |         9 |         6 |         15
+(1 fila)

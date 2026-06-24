@@ -118,7 +118,7 @@ import psycopg2
 
 # Datos de conexión
 conn = psycopg2.connect(
-    host="localhost",
+    host="postgres",      # Codespaces: "postgres" | Local: "localhost"
     database="veterinariadb",
     user="postgres",
     password="1234"

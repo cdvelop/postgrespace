@@ -13,7 +13,6 @@
   "remoteEnv": {
     "PGHOST": "postgres",
     "PGUSER": "postgres",
-    "PGPASSWORD": "1234",
     "PGDATABASE": "postgres"
   },
 

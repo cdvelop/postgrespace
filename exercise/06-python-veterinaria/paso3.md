@@ -31,7 +31,7 @@ Crea `paso3.py`:
 import psycopg2
 
 conn = psycopg2.connect(
-    host="localhost",
+    host="postgres",      # Codespaces: "postgres" | Local: "localhost"
     database="veterinariadb",
     user="postgres",
     password="1234"
@@ -232,8 +232,8 @@ def agendar_consulta(conn, fecha, motivo, costo, tutor_id, mascota_id, vet_id, s
         cursor.close()
 
 # Uso:
-conn = psycopg2.connect(host="localhost", database="veterinariadb",
-                        user="postgres", password="1234")
+conn = psycopg2.connect(host="postgres",  # Codespaces: "postgres" | Local: "localhost"
+                        database="veterinariadb", user="postgres", password="1234")
 id_c = agendar_consulta(conn, "2026-06-22", "Vacuna anual", 30.00, 2, 4, 1, 2)
 print(f"Nueva consulta id: {id_c}")
 conn.close()
