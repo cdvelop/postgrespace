@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   pgnet:
     driver: bridge
@@ -7,13 +5,15 @@ networks:
 services:
 
   workspace:
-    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: sleep infinity
     networks:
       - pgnet
 
   postgres:
-    image: postgres:16
+    image: postgres:15-alpine
     restart: unless-stopped
     command: ["postgres", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
     environment:
@@ -29,24 +29,27 @@ services:
       - pgnet
 
   pgadmin:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4:9.16
     restart: unless-stopped
     user: root
     environment:
       PGADMIN_DEFAULT_EMAIL: postgres@sql.dev
       PGADMIN_DEFAULT_PASSWORD: 1234
-      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      # pgAdmin corre detrás del proxy de Codespaces, que TERMINA el TLS y le
+      # reenvía por HTTP. Sin esto pgAdmin cree que la petición es HTTP, genera
+      # mal la cookie de sesión/URLs y las XHR autenticadas dan 401.
+      # Estas variables activan el ProxyFix: pgAdmin confía en las cabeceras
+      # X-Forwarded-* del proxy (1 salto) y reconstruye el esquema (https) real.
+      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: 1
+      PGADMIN_CONFIG_PROXY_X_HOST_COUNT: 1
+      PGADMIN_CONFIG_PROXY_X_PREFIX_COUNT: 1
     ports:
       - "5050:80"
     volumes:
-      # Pre-registra el servidor PostgreSQL: los alumnos no tienen que
-      # registrarlo a mano, ya aparece bajo "Servers" al abrir pgAdmin.
       - ./pgadmin/servers.json:/pgadmin4/servers.json
       - ./pgadmin/pgpassfile:/pgpassfile
-      # Montar data/ directamente sobre el subdirectorio del usuario de pgAdmin.
-      # pgAdmin escribe los backups en /var/lib/pgadmin/storage/postgres_sql.dev/
-      # y como ese path ya existe como mount point, no intenta crearlo ni hacerle chmod 700.
-      # Resultado: los archivos quedan en data/ sin subcarpeta intermedia.
       - ../data:/var/lib/pgadmin/storage/postgres_sql.dev
+    depends_on:
+      - postgres
     networks:
       - pgnet

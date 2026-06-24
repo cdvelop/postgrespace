@@ -47,6 +47,38 @@ data/
 
 ---
 
+## Restaurar un backup desde la terminal
+
+pgAdmin no tiene una opción directa para restaurar desde un archivo `.sql`. La forma más
+confiable es usar `psql` desde el terminal de VS Code.
+
+**1. Crea la base de datos destino** (si no existe):
+
+```bash
+psql -U postgres -c "CREATE DATABASE nombre_restaurado;"
+```
+
+**2. Restaura el archivo:**
+
+```bash
+psql -U postgres -d nombre_restaurado < /data/mi_respaldo.sql
+```
+
+Verás una lista de mensajes `SET`, `CREATE TABLE`, `INSERT`... Si termina sin `ERROR`,
+la restauración fue exitosa.
+
+**3. Verifica:**
+
+```bash
+psql -U postgres -d nombre_restaurado -c "\dt"
+```
+
+> 💡 ¿Quieres practicar esto con un caso concreto? El
+> [Set 04 — Ejercicio 1](../exercise/04-procedimientos-psql/paso1.md) tiene un paso a paso
+> completo de backup y restauración sobre la base de la veterinaria.
+
+---
+
 ## Notas adicionales
 
 ### `.gitkeep`
