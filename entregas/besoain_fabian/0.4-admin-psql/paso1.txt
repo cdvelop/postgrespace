@@ -1,0 +1,96 @@
+veterinariadb=# \conninfo
+        Informaci¾n de Conexi¾n
+       Parßmetro        |     Valor
+------------------------+---------------
+ Base de Datos          | veterinariadb
+ Usuario Cliente        | postgres
+ Host                   | localhost
+ Direcci¾n de Host      | ::1
+ Puerto del Servidor    | 5432
+ Opciones               |
+ Versi¾n de Protocolo   | 3.0
+ Se Us¾ Contrase±a      | verdadero
+ Autenticado con GSSAPI | falso
+ PID de Backend         | 23696
+ Conexi¾n SSL           | falso
+ Superuser              | on
+ Hot Standby            | off
+(13 filas)
+
+
+veterinariadb=# \l
+                                                                        Listado de base de datos
+    Nombre     |  Due±o   | Codificaci¾n | Proveedor de locale |      Collate       |       Ctype        | Configuraci¾n regional | Reglas ICU: |      Privilegios
+---------------+----------+--------------+---------------------+--------------------+--------------------+------------------------+-------------+-----------------------
+ postgres      | postgres | UTF8         | libc                | Spanish_Spain.1252 | Spanish_Spain.1252 |                        |             |
+ template0     | postgres | UTF8         | libc                | Spanish_Spain.1252 | Spanish_Spain.1252 |                        |             | =c/postgres          +
+               |          |              |                     |                    |                    |                        |             | postgres=CTc/postgres
+ template1     | postgres | UTF8         | libc                | Spanish_Spain.1252 | Spanish_Spain.1252 |                        |             | =c/postgres          +
+               |          |              |                     |                    |                    |                        |             | postgres=CTc/postgres
+ veterinariadb | postgres | UTF8         | libc                | Spanish_Spain.1252 | Spanish_Spain.1252 |                        |             |
+(4 filas)
+
+
+veterinariadb=# \dt
+                  Listado de tablas
+ Esquema |         Nombre         | Tipo  |  Due±o
+---------+------------------------+-------+----------
+ public  | consulta_servicios     | tabla | postgres
+ public  | consultas_veterinarias | tabla | postgres
+ public  | mascotas               | tabla | postgres
+ public  | servicios              | tabla | postgres
+ public  | tutores                | tabla | postgres
+ public  | veterinarios           | tabla | postgres
+(6 filas)
+
+
+veterinariadb=# \d mascotas
+                                           Tabla ½public.mascotas╗
+  Columna   |         Tipo          | Ordenamiento | Nulable  |                 Por omisi¾n
+------------+-----------------------+--------------+----------+----------------------------------------------
+ id_mascota | integer               |              | not null | nextval('mascotas_id_mascota_seq'::regclass)
+ nombre     | character varying(50) |              | not null |
+ especie    | character varying(30) |              |          |
+ edad_meses | integer               |              |          |
+ tutor_id   | integer               |              |          |
+═ndices:
+    "mascotas_pkey" PRIMARY KEY, btree (id_mascota)
+Restricciones de llave forßnea:
+    "fk_tutor" FOREIGN KEY (tutor_id) REFERENCES tutores(id_tutor) ON DELETE CASCADE
+Referenciada por:
+    TABLE "consultas_veterinarias" CONSTRAINT "fk_consulta_mascota" FOREIGN KEY (mascota_id) REFERENCES mascotas(id_mascota) ON DELETE CASCADE
+
+
+veterinariadb=# \du
+                              Listado de roles
+ Nombre de rol |                         Atributos
+---------------+------------------------------------------------------------
+ postgres      | Superusuario, Crear rol, Crear BD, Replicaci¾n, Ignora RLS
+
+
+veterinariadb=# SELECT nombre, especie FROM mascotas ORDER BY nombre;
+  nombre  | especie
+----------+---------
+ Firulais | Perro
+ Kira     | Gato
+ Luna     | Gato
+ Michi    | Gato
+ Nemo     | Pez
+ Pepe     | Ave
+ Rocky    | Perro
+ Toby     | Perro
+(8 filas)
+
+
+veterinariadb=# SELECT t.nombre AS tutor, COUNT(m.id_mascota) AS mascotas
+veterinariadb-# FROM tutores t
+veterinariadb-# LEFT JOIN mascotas m ON m.tutor_id = t.id_tutor
+veterinariadb-# GROUP BY t.nombre
+veterinariadb-# ORDER BY mascotas DESC;
+     tutor      | mascotas
+----------------+----------
+ Ana G¾mez      |        3
+ Carlos Mendoza |        3
+ SofÝa Rojas    |        1
+ Luis MartÝnez  |        1
+(4 filas)

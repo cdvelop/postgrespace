@@ -17,7 +17,7 @@ Python ya está incluido — no necesitas instalar nada. Verifica en el terminal
 python3 --version
 ```
 
-Verás algo como `Python 3.11.x`. ✅
+Verás algo como `Python 3.12.x` (o cualquier `3.x`). ✅
 
 ### Si usas instalación local en Windows
 
@@ -118,7 +118,7 @@ import psycopg2
 
 # Datos de conexión
 conn = psycopg2.connect(
-    host="localhost",
+    host="postgres",      # Codespaces: "postgres" | Local: "localhost"
     database="veterinariadb",
     user="postgres",
     password="1234"

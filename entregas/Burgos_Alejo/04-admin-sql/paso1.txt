@@ -1,0 +1,64 @@
+veterinariadb=# \conninfo
+        Informaci¾n de Conexi¾n
+       Parßmetro        |     Valor
+------------------------+---------------
+ Base de Datos          | veterinariadb
+ Usuario Cliente        | postgres
+ Host                   | localhost
+ Direcci¾n de Host      | ::1
+ Puerto del Servidor    | 5432
+ Opciones               |
+ Versi¾n de Protocolo   | 3.0
+ Se Us¾ Contrase±a      | verdadero
+ Autenticado con GSSAPI | falso
+ PID de Backend         | 11500
+ Conexi¾n SSL           | falso
+ Superuser              | on
+ Hot Standby            | off
+(13 filas)
+
+veterinariadb=# \dt
+                  Listado de tablas
+ Esquema |         Nombre         | Tipo  |  Due±o
+---------+------------------------+-------+----------
+ public  | consulta_servicios     | tabla | postgres
+ public  | consultas_veterinarias | tabla | postgres
+ public  | mascotas               | tabla | postgres
+ public  | servicios              | tabla | postgres
+ public  | tutores                | tabla | postgres
+ public  | veterinarios           | tabla | postgres
+(6 filas)
+
+veterinariadb=# \du
+                              Listado de roles
+ Nombre de rol |                         Atributos
+---------------+------------------------------------------------------------
+ postgres      | Superusuario, Crear rol, Crear BD, Replicaci¾n, Ignora RLS
+
+
+veterinariadb=# SELECT nombre, especie FROM mascotas ORDER BY nombre;
+  nombre  | especie
+----------+---------
+ Firulais | Perro
+ Kira     | Gato
+ Luna     | Gato
+ Michi    | Gato
+ Nemo     | Pez
+ Pepe     | Ave
+ Rocky    | Perro
+ Toby     | Perro
+(8 filas)
+
+
+veterinariadb=# SELECT t.nombre AS tutor, COUNT(m.id_mascota) AS mascotas
+veterinariadb-# FROM tutores t
+veterinariadb-# LEFT JOIN mascotas m ON m.tutor_id = t.id_tutor
+veterinariadb-# GROUP BY t.nombre
+veterinariadb-# ORDER BY mascotas DESC;
+     tutor      | mascotas
+----------------+----------
+ Ana G¾mez      |        3
+ Carlos Mendoza |        3
+ SofÝa Rojas    |        1
+ Luis MartÝnez  |        1
+(4 filas)

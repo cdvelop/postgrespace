@@ -56,7 +56,7 @@ En Codespaces esto se hace solo. En local lo haces **una vez**:
    guarda.
 2. Selecciona la base **`veterinariadb`** y abre el **Query Tool**.
 3. Abre en GitHub el archivo
-   [`.devcontainer/initdb/01-veterinaria.sql`](../.devcontainer/initdb/01-veterinaria.sql) y
+   [`.devcontainer/initdb/veterinaria.sql`](../.devcontainer/initdb/veterinaria.sql) y
    **copia desde `CREATE TABLE tutores ...` hasta el final**. Pégalo en el Query Tool y ejecútalo
    (▶ o `F5`).
    **No copies** las dos primeras líneas (`CREATE DATABASE veterinariadb;` y `\connect

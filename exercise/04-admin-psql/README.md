@@ -8,7 +8,7 @@ a hacer **backups** que te permiten recuperarte de cualquier error.
 
 > **Requisito:** haber completado los Sets 01, 02 y 03.
 >
-> 🛟 **Empieza ejecutando [`setup.sql`](setup.sql)** en pgAdmin sobre `veterinariadb`.
+> 🛟 **El setup.sql lo ejecutarás en el Paso 1.3 directamente desde `psql`** — ese es el primer ejercicio.
 
 ## Ruta de aprendizaje
 
