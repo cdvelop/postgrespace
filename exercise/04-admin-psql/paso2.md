@@ -43,10 +43,19 @@ CREATE USER recepcionista WITH PASSWORD 'clave123';
 GRANT CONNECT ON DATABASE veterinariadb TO recepcionista;
 ```
 
+**Conéctate a `veterinariadb`** (el `GRANT` sobre tablas debe ejecutarse dentro de esa base):
+
+```
+\c veterinariadb
+```
+
+```
+You are now connected to database "veterinariadb" as user "postgres".
+```
+
 **Dale permiso de leer todas las tablas:**
 
 ```sql
-\c veterinariadb
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO recepcionista;
 ```
 
@@ -94,6 +103,14 @@ ERROR:  permission denied for table mascotas
 
 Si ya no necesitas que `recepcionista` tenga acceso a una tabla específica:
 
+Primero sal de psql si todavía estás dentro:
+
+```
+\q
+```
+
+Luego conéctate como superusuario:
+
 ```bash
 psql -U postgres -d veterinariadb
 ```
@@ -103,14 +120,33 @@ psql -U postgres -d veterinariadb
 REVOKE SELECT ON consultas_veterinarias FROM recepcionista;
 ```
 
-Ahora si `recepcionista` intenta consultar esa tabla:
+Verifica conectándote como `recepcionista`:
+
+```
+\q
+```
+
+```bash
+psql -U recepcionista -d veterinariadb
+```
 
 ```sql
 SELECT costo FROM consultas_veterinarias;
--- ERROR: permission denied for table consultas_veterinarias
 ```
 
-Vuelve a dar el permiso para no romper los pasos siguientes:
+```
+ERROR:  permission denied for table consultas_veterinarias
+```
+
+✅ El permiso fue revocado. Sal y vuelve a darlo para no romper los pasos siguientes:
+
+```
+\q
+```
+
+```bash
+psql -U postgres -d veterinariadb
+```
 
 ```sql
 GRANT SELECT ON consultas_veterinarias TO recepcionista;
@@ -136,9 +172,17 @@ psql -U postgres
 ```sql
 CREATE USER veterinario_app WITH PASSWORD 'vet456';
 GRANT CONNECT ON DATABASE veterinariadb TO veterinario_app;
+```
 
+```
 \c veterinariadb
+```
 
+```
+You are now connected to database "veterinariadb" as user "postgres".
+```
+
+```sql
 -- Escritura solo donde opera
 GRANT SELECT, INSERT ON consultas_veterinarias TO veterinario_app;
 GRANT SELECT, INSERT ON consulta_servicios     TO veterinario_app;
@@ -148,6 +192,10 @@ GRANT SELECT ON tutores, mascotas, veterinarios, servicios TO veterinario_app;
 ```
 
 Verifica:
+
+```
+\q
+```
 
 ```bash
 psql -U veterinario_app -d veterinariadb

@@ -1,8 +1,8 @@
 -- =============================================================
 -- Set 04 — Punto de partida (estado "Set 03 terminado")
 --
--- Ejecuta este script UNA VEZ al empezar el Set 04, en el Query Tool
--- de pgAdmin conectado a la base "veterinariadb".
+-- Ejecuta este script UNA VEZ al empezar el Set 04, desde psql con:
+--   \i /ruta/al/archivo/setup.sql
 --
 -- Deja la base con las 6 tablas del Set 03 ya completas (tutores,
 -- mascotas, veterinarios, consultas_veterinarias con CHECK/DEFAULT,
