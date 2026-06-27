@@ -1,0 +1,84 @@
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ psql -U postgres -d veterinariadb
+psql (16.14 (Ubuntu 16.14-0ubuntu0.24.04.1))
+Type "help" for help.
+
+veterinariadb=# \conninfo
+You are connected to database "veterinariadb" as user "postgres" on host "postgres" (address "172.18.0.3") at port "5432".
+veterinariadb=# \l
+                                                        List of databases
+     Name      |  Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | ICU Locale | ICU Rules |   Access privileges   
+---------------+----------+----------+-----------------+------------+------------+------------+-----------+-----------------------
+ postgres      | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | 
+ template0     | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
+               |          |          |                 |            |            |            |           | postgres=CTc/postgres
+ template1     | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
+               |          |          |                 |            |            |            |           | postgres=CTc/postgres
+ veterinariadb | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | 
+(4 rows)
+
+veterinariadb=# \dt
+                 List of relations
+ Schema |          Name          | Type  |  Owner   
+--------+------------------------+-------+----------
+ public | consulta_servicios     | table | postgres
+ public | consultas_veterinarias | table | postgres
+ public | mascotas               | table | postgres
+ public | servicios              | table | postgres
+ public | tutores                | table | postgres
+ public | veterinarios           | table | postgres
+(6 rows)
+
+veterinariadb=# \d mascotas
+                                         Table "public.mascotas"
+   Column   |         Type          | Collation | Nullable |                   Default                    
+------------+-----------------------+-----------+----------+----------------------------------------------
+ id_mascota | integer               |           | not null | nextval('mascotas_id_mascota_seq'::regclass)
+ nombre     | character varying(50) |           | not null | 
+ especie    | character varying(30) |           |          | 
+ edad_meses | integer               |           |          | 
+ tutor_id   | integer               |           |          | 
+Indexes:
+    "mascotas_pkey" PRIMARY KEY, btree (id_mascota)
+Foreign-key constraints:
+    "fk_tutor" FOREIGN KEY (tutor_id) REFERENCES tutores(id_tutor) ON DELETE CASCADE
+Referenced by:
+    TABLE "consultas_veterinarias" CONSTRAINT "fk_consulta_mascota" FOREIGN KEY (mascota_id) REFERENCES mascotas(id_mascota) ON DELETE CASCADE
+
+veterinariadb=# \du
+                             List of roles
+ Role name |                         Attributes                         
+-----------+------------------------------------------------------------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS
+
+veterinariadb=# SELECT nombre, especie FROM mascotas ORDER BY nombre;
+  nombre  | especie 
+----------+---------
+ Firulais | Perro
+ Kira     | Gato
+ Luna     | Gato
+ Michi    | Gato
+ Nemo     | Pez
+ Pepe     | Ave
+ Rocky    | Perro
+ Toby     | Perro
+(8 rows)
+
+veterinariadb=# SELECT t.nombre AS tutor, COUNT(m.id_mascota) AS mascotas
+FROM tutores t
+LEFT JOIN mascotas m ON m.tutor_id = t.id_tutor
+GROUP BY t.nombre
+ORDER BY mascotas DESC;
+     tutor      | mascotas 
+----------------+----------
+ Ana Gómez      |        3
+ Carlos Mendoza |        3
+ Sofía Rojas    |        1
+ Luis Martínez  |        1
+(4 rows)
+
+veterinariadb=# \c postgres
+You are now connected to database "postgres" as user "postgres".
+postgres=# \c veterinariadb
+You are now connected to database "veterinariadb" as user "postgres".
+veterinariadb=# \q
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ 

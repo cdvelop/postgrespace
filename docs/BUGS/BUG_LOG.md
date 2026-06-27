@@ -94,7 +94,7 @@ volumes:
 
 ### Síntoma
 
-Al abrir pgAdmin, solo aparecía la base de datos `postgres` (la por defecto). La base de datos `veterinariadb` definida en [.devcontainer/initdb/01-veterinaria.sql](../.devcontainer/initdb/01-veterinaria.sql) no existía.
+Al abrir pgAdmin, solo aparecía la base de datos `postgres` (la por defecto). La base de datos `veterinariadb` definida en [.devcontainer/initdb/veterinaria.sql](../.devcontainer/initdb/veterinaria.sql) no existía.
 
 ### Causa
 
@@ -112,7 +112,7 @@ Los scripts en `docker-entrypoint-initdb.d` **solo se ejecutan cuando el data di
    sudo find /workspaces/postgrespace/pgdta -mindepth 1 -delete
    ```
 
-3. Reiniciar el contenedor. PostgreSQL detecta el directorio vacío, ejecuta `initdb` y luego corre `01-veterinaria.sql`, creando `veterinariadb` con la tabla `tutores` y 2 registros de ejemplo.
+3. Reiniciar el contenedor. PostgreSQL detecta el directorio vacío, ejecuta `initdb` y luego corre `veterinaria.sql`, creando `veterinariadb` con la tabla `tutores` y 2 registros de ejemplo.
 
 ### Estado actual verificado
 

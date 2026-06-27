@@ -11,23 +11,6 @@
 
 ---
 
-## Paso 1.0 — Prepara tu punto de partida
-
-Ejecuta [`setup.sql`](setup.sql) en el Query Tool de pgAdmin sobre `veterinariadb` y verifica:
-
-```sql
-SELECT (SELECT COUNT(*) FROM tutores)                 AS tutores,
-       (SELECT COUNT(*) FROM mascotas)                AS mascotas,
-       (SELECT COUNT(*) FROM veterinarios)            AS veterinarios,
-       (SELECT COUNT(*) FROM consultas_veterinarias)  AS consultas,
-       (SELECT COUNT(*) FROM servicios)               AS servicios,
-       (SELECT COUNT(*) FROM consulta_servicios)      AS relaciones;
-```
-
-Debe dar **4, 8, 3, 9, 6, 15**. ✅
-
----
-
 ## Paso 1.1 — ¿Qué es psql y para qué sirve?
 
 **pgAdmin** es la interfaz gráfica con menús y clics. Útil para explorar, pero
@@ -40,6 +23,7 @@ Debe dar **4, 8, 3, 9, 6, 15**. ✅
 - Ejecutar scripts SQL completos
 
 Todo lo que haces con el ratón en pgAdmin, puedes hacerlo en psql escribiendo comandos.
+A partir de este set, **psql es tu herramienta principal**.
 
 ---
 
@@ -81,7 +65,51 @@ Eso significa que estás dentro de `veterinariadb` como usuario `postgres`. ✅
 
 ---
 
-## Paso 1.3 — Comandos de navegación
+## Paso 1.3 — Prepara el punto de partida con psql
+
+Vamos a cargar el script [`setup.sql`](setup.sql) directamente desde psql usando el
+meta-comando `\i` (de *input*). Necesitas indicar la **ruta completa** al archivo.
+
+### En Codespaces
+
+```
+\i /workspaces/postgrespace/exercise/04-admin-psql/setup.sql
+```
+
+### En instalación local (Windows)
+
+Usa la ruta donde clonaste el repositorio, con barras normales `/`:
+
+```
+\i C:/ruta/a/postgrespace/exercise/04-admin-psql/setup.sql
+```
+
+> 💡 **¿Cómo sé la ruta exacta?** En el Terminal escribe `pwd` (Linux/Mac) o `cd`
+> (Windows) para ver en qué carpeta estás. También puedes arrastrar el archivo desde
+> el explorador de VS Code al terminal para que complete la ruta automáticamente.
+
+Verás que psql ejecuta cada instrucción y al final aparece `INSERT 0 15` y similares.
+
+Verifica que los datos cargaron correctamente con esta consulta:
+
+```sql
+SELECT (SELECT COUNT(*) FROM tutores)                 AS tutores,
+       (SELECT COUNT(*) FROM mascotas)                AS mascotas,
+       (SELECT COUNT(*) FROM veterinarios)            AS veterinarios,
+       (SELECT COUNT(*) FROM consultas_veterinarias)  AS consultas,
+       (SELECT COUNT(*) FROM servicios)               AS servicios,
+       (SELECT COUNT(*) FROM consulta_servicios)      AS relaciones;
+```
+
+Debe dar **4, 8, 3, 9, 6, 15**. ✅
+
+> **¿Prefieres usar pgAdmin?** Puedes abrir `setup.sql` en el Query Tool de pgAdmin y
+> ejecutarlo allí. El resultado es idéntico — pero aprender a hacerlo con `\i` en psql
+> es parte del objetivo de este set.
+
+---
+
+## Paso 1.4 — Comandos de navegación
 
 Los comandos que empiezan con `\` son **meta-comandos** de psql (no son SQL).
 No llevan `;` al final.
@@ -128,7 +156,7 @@ Ahora mismo solo hay uno: `postgres` (superusuario con todos los permisos).
 
 ---
 
-## Paso 1.4 — Tu primera consulta desde psql
+## Paso 1.5 — Tu primera consulta desde psql
 
 Escribe SQL directamente en el prompt, igual que en pgAdmin:
 
@@ -151,7 +179,7 @@ ORDER BY mascotas DESC;
 
 ---
 
-## Paso 1.5 — Cambia de base de datos y sal
+## Paso 1.6 — Cambia de base de datos y sal
 
 Conéctate a otra base sin salir de psql:
 
@@ -179,6 +207,7 @@ Vuelves al terminal normal.
 
 | Meta-comando | Qué hace |
 |---|---|
+| `\i ruta/archivo.sql` | Ejecuta un script SQL desde un archivo |
 | `\conninfo` | Muestra conexión activa |
 | `\l` | Lista bases de datos |
 | `\dt` | Lista tablas |
@@ -188,8 +217,8 @@ Vuelves al terminal normal.
 | `\q` | Sale de psql |
 
 > 📤 **Entrega:** guarda en `paso1.txt` el output del terminal con los resultados de
-> los meta-comandos `\conninfo`, `\dt` y `\du`, y las dos consultas del paso 1.4.
+> los meta-comandos `\conninfo`, `\dt` y `\du`, y las dos consultas del paso 1.5.
 > Adjunta una captura (`paso1.png`) donde se vea el resultado de la segunda consulta.
 > Dónde ubicar los archivos: [Entrega](ENTREGA.md).
 
-➡️ **Siguiente:** en el [Ejercicio 2](paso2.md) crearás tu primera **función almacenada**.
+➡️ **Siguiente:** en el [Ejercicio 2](paso2.md) crearás usuarios y permisos desde psql.
