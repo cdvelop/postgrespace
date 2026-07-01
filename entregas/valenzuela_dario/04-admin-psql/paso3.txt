@@ -1,0 +1,135 @@
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ psql -U postgres -c "
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'veterinariadb' AND pid <> pg_backend_pid();
+"
+ pg_terminate_backend 
+----------------------
+ t
+ t
+(2 rows)
+
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ psql -U postgres -c "DROP DATABASE veterinariadb;"
+DROP DATABASE
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ psql -U postgres -c "\l"
+                                                      List of databases
+   Name    |  Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | ICU Locale | ICU Rules |   Access privileges   
+-----------+----------+----------+-----------------+------------+------------+------------+-----------+-----------------------
+ postgres  | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | 
+ template0 | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
+           |          |          |                 |            |            |            |           | postgres=CTc/postgres
+ template1 | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
+           |          |          |                 |            |            |            |           | postgres=CTc/postgres
+(3 rows)
+
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ psql -U postgres -c "CREATE DATABASE veterinariadb;"
+CREATE DATABASE
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ psql -U postgres -d veterinariadb < entregas/valenzuela_dario/04-procedimientos-psql/paso3_backup.sql
+SET
+SET
+SET
+SET
+SET
+ set_config 
+------------
+ 
+(1 row)
+
+SET
+SET
+SET
+SET
+SET
+SET
+CREATE TABLE
+ALTER TABLE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER SEQUENCE
+ALTER SEQUENCE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+COPY 15
+COPY 9
+COPY 8
+COPY 6
+COPY 4
+COPY 3
+ setval 
+--------
+      9
+(1 row)
+
+ setval 
+--------
+      8
+(1 row)
+
+ setval 
+--------
+      6
+(1 row)
+
+ setval 
+--------
+      4
+(1 row)
+
+ setval 
+--------
+      3
+(1 row)
+
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+@darovalenzuelaa ➜ /workspaces/postgrespace (main) $ psql -U postgres -d veterinariadb -c "SELECT id_mascota, nombre FROM mascotas WHERE id_mascota = 1;"
+ id_mascota |  nombre  
+------------+----------
+          1 | Firulais
+(1 row)

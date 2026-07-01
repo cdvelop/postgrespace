@@ -109,7 +109,9 @@ Ahora la base tiene un dato distinto al backup que acabas de hacer. ✅
 
 Esto simula un accidente grave. Desde la terminal:
 
-**1. Desconéctate de `veterinariadb`** (PostgreSQL no permite borrar una base con conexiones activas):
+**1. Cierra todas las conexiones activas a `veterinariadb`**
+
+PostgreSQL no permite borrar una base si hay sesiones abiertas (por ejemplo, pgAdmin, otro terminal, o los usuarios del paso anterior). Este comando las cierra forzosamente:
 
 ```bash
 psql -U postgres -c "
@@ -118,6 +120,15 @@ FROM pg_stat_activity
 WHERE datname = 'veterinariadb' AND pid <> pg_backend_pid();
 "
 ```
+
+| Parte | Qué hace |
+|---|---|
+| `pg_stat_activity` | Vista del sistema con todas las conexiones activas ahora mismo |
+| `datname = 'veterinariadb'` | Filtra solo las conexiones a esa base |
+| `pid <> pg_backend_pid()` | Excluye la conexión actual (la que está ejecutando el comando) |
+| `pg_terminate_backend(pid)` | Cierra forzosamente cada conexión encontrada |
+
+Si no hay conexiones activas, devuelve 0 filas — eso también está bien. ✅
 
 **2. Borra la base:**
 
@@ -207,6 +218,6 @@ Debe dar **4, 8, 3, 9, 6, 15**. ✅ Todo está intacto.
 
 ---
 
-> 🎓 **Has completado el Set 04.** Ahora sabes usar psql, crear funciones y
-> procedimientos, proteger datos con usuarios y permisos, y hacer backups reales.
-> En el [Set 06](../06-python-veterinaria/README.md) usarás todo esto desde Python.
+> 🎓 **Has completado el Set 04.** Ahora sabes controlar PostgreSQL desde la terminal
+> con psql, proteger los datos creando usuarios con permisos específicos, y hacer
+> backups reales que te permiten recuperarte de cualquier error.

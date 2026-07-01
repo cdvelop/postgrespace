@@ -17,7 +17,7 @@ Crea el archivo `paso2_vulnerable.py` en tu carpeta de entrega:
 import psycopg2
 
 conn = psycopg2.connect(
-    host="localhost",
+    host="postgres",      # Codespaces: "postgres" | Local: "localhost"
     database="veterinariadb",
     user="postgres",
     password="1234"
@@ -155,7 +155,7 @@ Crea `paso2.py` (la versión segura):
 import psycopg2
 
 conn = psycopg2.connect(
-    host="localhost",
+    host="postgres",      # Codespaces: "postgres" | Local: "localhost"
     database="veterinariadb",
     user="postgres",
     password="1234"
@@ -211,7 +211,8 @@ Hasta ahora usaste `fetchall()`. Cuando la consulta devuelve exactamente una fil
 
 ```python
 conn = psycopg2.connect(
-    host="localhost", database="veterinariadb",
+    host="postgres",      # Codespaces: "postgres" | Local: "localhost"
+    database="veterinariadb",
     user="postgres", password="1234"
 )
 cursor = conn.cursor()
