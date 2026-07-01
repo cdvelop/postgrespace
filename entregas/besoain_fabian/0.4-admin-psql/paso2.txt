@@ -1,0 +1,13 @@
+## CREATE USER
+
+postgres=# CREATE USER recepcionista WITH PASSWORD 'clave123';
+
+
+## GRANT
+
+veterinariadb=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO recepcionista;
+
+
+## REVOKE
+
+veterinariadb=# REVOKE SELECT ON consultas_veterinarias FROM recepcionista;
