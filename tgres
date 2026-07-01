@@ -1,0 +1,15 @@
+                                         Table "public.mascotas"
+   Column   |         Type          | Collation | Nullable |                   Default                    
+------------+-----------------------+-----------+----------+----------------------------------------------
+ id_mascota | integer               |           | not null | nextval('mascotas_id_mascota_seq'::regclass)
+ nombre     | character varying(50) |           | not null | 
+ especie    | character varying(30) |           |          | 
+ edad_meses | integer               |           |          | 
+ tutor_id   | integer               |           |          | 
+Indexes:
+    "mascotas_pkey" PRIMARY KEY, btree (id_mascota)
+Foreign-key constraints:
+    "fk_tutor" FOREIGN KEY (tutor_id) REFERENCES tutores(id_tutor) ON DELETE CASCADE
+Referenced by:
+    TABLE "consultas_veterinarias" CONSTRAINT "fk_consulta_mascota" FOREIGN KEY (mascota_id) REFERENCES mascotas(id_mascota) ON DELETE CASCADE
+
